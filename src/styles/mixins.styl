@@ -1,0 +1,31 @@
+scrollbar-x(size, bg, thumb, radius)
+  &::-webkit-scrollbar
+    width size
+
+  &::-webkit-scrollbar:horizontal
+    background bg
+    border-radius radius
+
+  &::-webkit-scrollbar-thumb:horizontal
+    background-color thumb
+    border-radius radius
+
+  &::-webkit-scrollbar-button:decrement
+  &::-webkit-scrollbar-button:increment
+    display none
+
+scrollbar-y(size, bg, thumb, radius)
+  &::-webkit-scrollbar
+    height size
+
+  &::-webkit-scrollbar:vertical
+    background bg
+    border-radius radius
+
+  &::-webkit-scrollbar-thumb:vertical
+    background-color thumb
+    border-radius radius
+
+  &::-webkit-scrollbar-button:decrement
+  &::-webkit-scrollbar-button:increment
+    display none

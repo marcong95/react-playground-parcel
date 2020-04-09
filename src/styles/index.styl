@@ -1,0 +1,26 @@
+@import 'mixins'
+
+#app
+  margin 0 auto
+  padding 1em
+  max-width 980px
+
+.table-body-scrollable
+  height 500px
+  table-layout fixed
+  // display flex
+  // flex-direction column
+  // height 500px
+
+  // tbody
+  //   flex 1
+  //   overflow auto
+
+.file-list-item
+  display flex
+
+  & + .file-list-item
+    margin-top 0.5em
+
+  *
+    text-transform none !important
