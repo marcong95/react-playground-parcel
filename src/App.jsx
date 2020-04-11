@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { ZEITUIProvider, CSSBaseline } from '@zeit-ui/react'
 
-import './styles/index.styl'
 import AppLayout from './components/common/AppLayout'
 
 export default class ReactPlayground extends Component {
