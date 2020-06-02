@@ -2,7 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './src/App'
 
-// imported but transformed into #_app_<hash>
-import './src/styles/index.styl'
+import GlobalStyles from './src/styles'
 
-ReactDOM.render(<App />, document.getElementById('app'))
+ReactDOM.render(<>
+  <GlobalStyles />
+  <App />
+</>, document.getElementById('app'))

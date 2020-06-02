@@ -2,16 +2,21 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Button, Card, Dot, Tag, Progress, Text } from '@zeit-ui/react'
+import { Plus } from '@zeit-ui/react-icons'
 
-const PlusIcon = ({
-  style = { color: '#000' }
-}) => <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" shapeRendering="geometricPrecision" style={style}>
-  <path d="M12 5v14"/>
-  <path d="M5 12h14"/>
-</svg>
-PlusIcon.propTypes = {
-  style: PropTypes.object
-}
+const MarginedPlus = styled(Plus)`
+  margin-right: 0.25em;
+`
+
+const StyledText = styled(Text)``
+const FileListHeader = styled.div`
+  display: flex;
+  align-items: baseline;
+
+  & > ${StyledText} {
+    flex: 1;
+  }
+`
 
 const FileListItemDot = styled(Dot)`
   display: flex !important;
@@ -45,7 +50,7 @@ FileListItem.propTypes = {
 
 export default class FileUploader extends Component {
   static defaultProps = {
-    title: 'File Uploader'
+    title: 'File Upload'
   }
 
   static propTypes = {
@@ -68,14 +73,14 @@ export default class FileUploader extends Component {
 
     return (
       <Card>
-        <div>
-          <Text h3>{title}</Text>
+        <FileListHeader>
+          <StyledText h3>{title}</StyledText>
           <Button auto
             size="small"
             onClick={this.browse}>
-            <PlusIcon style={{ marginRight: '0.25em' }} /> Browse
+            <MarginedPlus size={12} /> Browse
           </Button>
-        </div>
+        </FileListHeader>
 
         {data.map(file =>
           <FileListItem key={file.name}
