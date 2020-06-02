@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import styled from 'styled-components'
 import { Button, Card, Dot, Tag, Progress, Text } from '@zeit-ui/react'
-import styles from './uploader.module.styl'
-
-console.log(styles)
 
 const PlusIcon = ({
   style = { color: '#000' }
@@ -15,19 +13,30 @@ PlusIcon.propTypes = {
   style: PropTypes.object
 }
 
+const FileListItemDot = styled(Dot)`
+  display: flex !important;
+
+  & + & {
+    margin-top: 0.5em;
+  }
+
+  * {
+    text-transform: none !important;
+  }
+`
+const FileListItemText = styled(Text)`
+  margin-right: 0.5em;
+`
+
 export const FileListItem = ({
   file,
   type = 'default'
 }) => {
-  return <Dot type={type}
-    className={styles.fileListItem}>
-    <Text span
-      small
-      style={{
-        marginRight: '0.5em'
-      }}>{file.name}</Text>
+  return <FileListItemDot type={type}>
+    <FileListItemText span
+      small>{file.name}</FileListItemText>
     <Tag>{file.type}</Tag>
-  </Dot>
+  </FileListItemDot>
 }
 FileListItem.propTypes = {
   file: PropTypes.object,
@@ -59,7 +68,7 @@ export default class FileUploader extends Component {
 
     return (
       <Card>
-        <div className="uploader-title">
+        <div>
           <Text h3>{title}</Text>
           <Button auto
             size="small"
