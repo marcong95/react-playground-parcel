@@ -2,7 +2,9 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Button, Card, Dot, Tag, Progress, Text } from '@zeit-ui/react'
-import { Plus } from '@zeit-ui/react-icons'
+import { Plus, Upload } from '@zeit-ui/react-icons'
+
+import axios from 'axios'
 
 const MarginedPlus = styled(Plus)`
   margin-right: 0.25em;
@@ -35,17 +37,24 @@ const FileListItemText = styled(Text)`
 
 export const FileListItem = ({
   file,
-  type = 'default'
+  type = 'default',
+  upload
 }) => {
   return <FileListItemDot type={type}>
     <FileListItemText span
       small>{file.name}</FileListItemText>
     <Tag>{file.type}</Tag>
+    <Button auto
+      size="mini"
+      onClick={() => upload(file)}>
+      <Upload size={12} />
+    </Button>
   </FileListItemDot>
 }
 FileListItem.propTypes = {
   file: PropTypes.object,
-  type: PropTypes.string
+  type: PropTypes.string,
+  upload: PropTypes.func
 }
 
 export default class FileUploader extends Component {
@@ -85,11 +94,13 @@ export default class FileUploader extends Component {
         {data.map(file =>
           <FileListItem key={file.name}
             file={file}
-            type="default" />)}
+            type="default"
+            upload={this.uploadOne} />)}
 
         <form name="fileForm"
           style={{ display: 'none' }}>
           <input type="file"
+            name="file"
             accept="image/*"
             multiple
             ref={this.fileInput}
@@ -108,6 +119,21 @@ export default class FileUploader extends Component {
     console.log(e.target.files)
     this.setState({
       data: Array.from(e.target.files)
+    })
+  }
+
+  uploadOne = file => {
+    console.log(file)
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    axios.post('http://localhost:4321', formData, {
+      onUploadProgress: progress => {
+        const { loaded, total } = progress
+        const percentage = (loaded / total * 100).toFixed(1)
+        console.log(`uploading ${file.name}: ${loaded} / ${total}, ${percentage}%`)
+      }
     })
   }
 }
