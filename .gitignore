@@ -2,4 +2,8 @@
 node_modules/
 dist/
 
+# just commit an empty directory
+upload/*
+!upload/.gitkeep
+
 .editorconfig
