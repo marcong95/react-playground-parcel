@@ -1,7 +1,15 @@
 import React, { Component } from 'react'
+import styled from 'styled-components'
 import { Row, Col, Text } from '@zeit-ui/react'
 
+import { Gauge } from '../visualizer/BarCircular'
 import FileUploader from '../uploader/FileUploader'
+
+const StyledGauge = styled(Gauge)`
+  display: inherit;
+  margin: 0 auto;
+  background: transparent;
+`
 
 export default class AppLayout extends Component {
   render() {
@@ -17,7 +25,14 @@ export default class AppLayout extends Component {
 
         <Row>
           <Col span={8}>
-            <Text>Navigation</Text>
+            <StyledGauge width={200}
+              height={200}
+              data={{
+                cpu: 22,
+                gpu: 33,
+                mem: 66,
+                fps: 99
+              }}/>
           </Col>
           <Col>
             <FileUploader />
