@@ -20,13 +20,13 @@ export function Gauge({
   const radiusScale = useMemo(() =>
     scaleBand({
       rangeRound: [radius, radius * 1 / 3],
-      domain: Object.entries(data).map(d => d[0]),
+      domain: data.map(d => d.name),
       padding: 0.15
     }), [radius])
   const angleScale = useMemo(
     () => scaleLinear({
       range: [minAngle, maxAngle],
-      // domain: [0, Math.max(...Object.entries(data).map(d => d[1]))]
+      // domain: [0, Math.max(...data.map(d => d.value))]
       domain: [0, 150]
     }), [])
 
@@ -35,12 +35,12 @@ export function Gauge({
     {...props}>
     <Group top={height / 2}
       left={width / 2}>
-      {Object.entries(data).map(([key, value], idx) => {
-        const innerRadius = radiusScale(key)
+      {data.map(({ name, value }, idx) => {
+        const innerRadius = radiusScale(name)
         const swipeAngle = angleScale(value)
 
-        return <React.Fragment key={`arc-${key}`}>
-          <Arc id={`arcbg-${key}`}
+        return <React.Fragment key={`arc-${name}`}>
+          <Arc id={`arcbg-${name}`}
             data={Infinity}
             innerRadius={innerRadius}
             outerRadius={innerRadius + radiusScale.bandwidth()}
@@ -49,18 +49,21 @@ export function Gauge({
             cornerRadius={radiusScale.bandwidth()}
             fill={PALETTES[idx]}
             opacity={backgroundOpacity || 0}/>
-          <Arc data={value}
+          <Arc id={`arc-${name}`}
+            data={value}
             innerRadius={innerRadius}
             outerRadius={innerRadius + radiusScale.bandwidth()}
             startAngle={0}
             endAngle={swipeAngle}
             cornerRadius={radiusScale.bandwidth()}
             fill={PALETTES[idx]}/>
-          <text fontSize="0.75em">
-            <textPath href={`#arcbg-${key}`}>
-              <tspan dx={10}
-                dy={10}>{key} {value}</tspan>
-            </textPath>
+          <text x="2em"
+            y={-innerRadius - radiusScale.bandwidth() / 4}
+            fontSize="0.6em">
+            <tspan dx="-0.5em"
+              textAnchor="end">{name.toUpperCase()}</tspan>
+            <tspan dx="1em"
+              textAnchor="start">{value}</tspan>
           </text>
         </React.Fragment>
       })}
@@ -68,7 +71,7 @@ export function Gauge({
   </svg>
 }
 Gauge.propTypes = {
-  data: PropTypes.object,
+  data: PropTypes.array,
   width: PropTypes.number,
   height: PropTypes.number,
   backgroundOpacity: PropTypes.number

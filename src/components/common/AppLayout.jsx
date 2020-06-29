@@ -27,12 +27,12 @@ export default class AppLayout extends Component {
           <Col span={8}>
             <StyledGauge width={200}
               height={200}
-              data={{
-                cpu: 22,
-                gpu: 33,
-                mem: 66,
-                fps: 99
-              }}/>
+              data={[
+                { name: 'cpu', value: 22 },
+                { name: 'gpu', value: 33 },
+                { name: 'mem', value: 66 },
+                { name: 'fps', value: 99 }
+              ]}/>
           </Col>
           <Col>
             <FileUploader />
