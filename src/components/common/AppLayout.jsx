@@ -40,10 +40,10 @@ export default function AppLayout() {
           <StyledGauge width={200}
             height={200}
             data={[
-              { name: 'cpu', value: 22 },
-              { name: 'gpu', value: 33 },
-              { name: 'mem', value: 66 },
-              { name: 'fps', value: 99 }
+              { name: 'cpu', value: 22, max: 100 },
+              { name: 'gpu', value: 33, max: 100 },
+              { name: 'mem', value: 66, max: 100 },
+              { name: 'fps', value: 99, max: 144 }
             ]}/>
         </Grid>
         <Grid xs={24} md={16}>

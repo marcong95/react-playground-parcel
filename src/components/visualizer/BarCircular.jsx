@@ -27,7 +27,7 @@ export function Gauge({
     () => scaleLinear({
       range: [minAngle, maxAngle],
       // domain: [0, Math.max(...data.map(d => d.value))]
-      domain: [0, 150]
+      domain: [0, 1]
     }), [])
 
   return <svg width={width}
@@ -35,9 +35,10 @@ export function Gauge({
     {...props}>
     <Group top={height / 2}
       left={width / 2}>
-      {data.map(({ name, value }, idx) => {
+      {data.map(({ name, value, max }, idx) => {
+        const ratio = value / max
         const innerRadius = radiusScale(name)
-        const swipeAngle = angleScale(value)
+        const swipeAngle = angleScale(ratio)
 
         return <React.Fragment key={`arc-${name}`}>
           <Arc id={`arcbg-${name}`}
@@ -50,7 +51,7 @@ export function Gauge({
             fill={PALETTES[idx]}
             opacity={backgroundOpacity || 0}/>
           <Arc id={`arc-${name}`}
-            data={value}
+            data={ratio}
             innerRadius={innerRadius}
             outerRadius={innerRadius + radiusScale.bandwidth()}
             startAngle={0}
