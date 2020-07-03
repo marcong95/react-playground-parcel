@@ -13,10 +13,27 @@ const AppHeader = styled.div`
     font-weight: normal;
   }
 `
+const GaugeContainer = styled.div`
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  &::after {
+    content: "";
+    display: block;
+    margin-bottom: 100%;
+  }
+
+  & > svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+`
 const StyledGauge = styled(Gauge)`
   display: inherit;
   margin: 0 auto;
-  background: transparent;
 `
 const CopyrightInfo = styled(Text)`
   display: block;
@@ -37,14 +54,14 @@ export default function AppLayout() {
 
       <Grid.Container gap={2}>
         <Grid xs={24} md={8}>
-          <StyledGauge width={200}
-            height={200}
-            data={[
+          <GaugeContainer>
+            <StyledGauge data={[
               { name: 'cpu', value: 22, max: 100 },
               { name: 'gpu', value: 33, max: 100 },
               { name: 'mem', value: 66, max: 100 },
               { name: 'fps', value: 99, max: 144 }
             ]}/>
+          </GaugeContainer>
         </Grid>
         <Grid xs={24} md={16}>
           <FileUploader />

@@ -8,15 +8,13 @@ const PALETTES = ['#d92027', '#ff9234', '#ffcd3c', '#35d0ba']
 
 export function Gauge({
   data,
-  width,
-  height,
   backgroundOpacity = 0.2,
   ...props
 }) {
   const minAngle = 0
   const maxAngle = Math.PI * 1.5
 
-  const radius = useMemo(() => Math.min(width, height) / 2, [width, height])
+  const radius = 500
   const radiusScale = useMemo(() =>
     scaleBand({
       rangeRound: [radius, radius * 1 / 3],
@@ -30,11 +28,13 @@ export function Gauge({
       domain: [0, 1]
     }), [])
 
-  return <svg width={width}
-    height={height}
+  return <svg width="100%"
+    height="100%"
+    viewBox="0 0 1000 1000"
+    preserveAspectRatio="xMinYMin meet"
     {...props}>
-    <Group top={height / 2}
-      left={width / 2}>
+    <Group top={radius}
+      left={radius}>
       {data.map(({ name, value, max }, idx) => {
         const ratio = value / max
         const innerRadius = radiusScale(name)
@@ -60,7 +60,7 @@ export function Gauge({
             fill={PALETTES[idx]}/>
           <text x="2em"
             y={-innerRadius - radiusScale.bandwidth() / 4}
-            fontSize="0.6em">
+            fontSize="3em">
             <tspan dx="-0.5em"
               textAnchor="end">{name.toUpperCase()}</tspan>
             <tspan dx="1em"
@@ -73,7 +73,5 @@ export function Gauge({
 }
 Gauge.propTypes = {
   data: PropTypes.array,
-  width: PropTypes.number,
-  height: PropTypes.number,
   backgroundOpacity: PropTypes.number
 }
