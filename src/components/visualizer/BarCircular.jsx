@@ -131,6 +131,7 @@ const GaugeContainer = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 
   &::after {
     content: "";
@@ -166,12 +167,16 @@ export default function PCMonitor({
       scales={scales}
       {...props}/>
     {data.map((item, index) => {
-      const [x, y] = polarToCartesian(RADIUS * 2, Math.PI / 2 * index)
+      const [x, y] = polarToCartesian(1, Math.PI / 2 * (index - 1))
       console.log(x, y)
       return <SingularGauge key={`subgauge-${item.name}`}
         data={item}
         accentColor={PALETTES[index]}
         scales={scales}
+        style={{
+          top: (y * 100) + '%',
+          left: (x * 100) + '%'
+        }}
         {...props}/>
     })}
   </GaugeContainer>
