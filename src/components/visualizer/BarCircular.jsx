@@ -1,10 +1,13 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Group } from '@vx/group'
 import { Arc } from '@vx/shape'
 import { scaleBand, scaleLinear } from '@vx/scale'
-import { polarToCartesian } from './utils'
+import { useSprings, animated } from 'react-spring'
+import { useDrag } from 'react-use-gesture'
+
+import { cartesianToPolar, polarToCartesian } from './utils'
 
 const PALETTES = ['#d92027', '#ff9234', '#ffcd3c', '#35d0ba']
 
@@ -132,6 +135,7 @@ const GaugeContainer = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
+  user-select: none;
 
   &::after {
     content: "";
@@ -145,10 +149,15 @@ const GaugeContainer = styled.div`
     height: 100%;
   }
 `
+const AnimatedMultipleGauge = animated(MultipleGauge)
+const AnimatedSingularGauge = animated(SingularGauge)
+
 export default function PCMonitor({
   data,
   ...props
 }) {
+  const [debugText, setDebugText] = useState('')
+
   const radius = useMemo(() =>
     scaleBand({
       rangeRound: [RADIUS, RADIUS * 1 / 3],
@@ -162,23 +171,54 @@ export default function PCMonitor({
     }), [])
   const scales = { radius, angle }
 
+  const [springProps, set] = useSprings(data.length + 1, () => ({
+    viewBox: '0 0 1200 1200',
+    from: {
+      viewBox: '0 0 1000 1000'
+    }
+  }))
+  const dragBind = useDrag(({
+    args: [index],
+    down,
+    movement,
+    direction: [dx, dy], // [+/- 0/0.5sqrt(2)/1] * 2
+    velocity
+  }) => {
+    const [, rad] = cartesianToPolar(dx, dy)
+    const deg = rad * 180 / Math.PI
+    const trigger = velocity > 0.2
+    setDebugText(JSON.stringify({ index, down, movement, deg, velocity, trigger }))
+
+    set(i => {
+      if (index !== i) return
+
+      return {
+        viewBox: '0 0 1200 1200'
+      }
+    })
+  })
+
   return <GaugeContainer>
-    <MultipleGauge data={data}
+    <AnimatedMultipleGauge data={data}
       scales={scales}
-      {...props}/>
+      {...props}
+      {...dragBind(0)}/>
     {data.map((item, index) => {
-      const [x, y] = polarToCartesian(1, Math.PI / 2 * (index - 1))
-      console.log(x, y)
-      return <SingularGauge key={`subgauge-${item.name}`}
+      const [x, y] = polarToCartesian(100, Math.PI / 2 * (index - 1))
+      return <AnimatedSingularGauge key={`subgauge-${item.name}`}
         data={item}
         accentColor={PALETTES[index]}
         scales={scales}
         style={{
-          top: (y * 100) + '%',
-          left: (x * 100) + '%'
+          top: `${y}%`,
+          left: `${x}%`
         }}
         {...props}/>
     })}
+    <span style={{
+      display: 'inline-block',
+      width: '50%'
+    }}>{debugText}</span>
   </GaugeContainer>
 }
 PCMonitor.propTypes = {
