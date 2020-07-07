@@ -14,6 +14,9 @@ const PALETTES = ['#d92027', '#ff9234', '#ffcd3c', '#35d0ba']
 const MIN_ANGLE = 0
 const MAX_ANGLE = Math.PI * 1.5
 const RADIUS = 500
+const getViewBox = r => `${-r} ${-r} ${r * 2} ${r * 2}`
+const INITIAL_VIEWBOX = getViewBox(RADIUS)
+const ACTIVE_VIEWBOX = getViewBox(RADIUS * 1.2)
 
 export function MultipleGauge({
   data,
@@ -25,11 +28,11 @@ export function MultipleGauge({
 
   return <svg width="100%"
     height="100%"
-    viewBox="0 0 1000 1000"
+    viewBox={INITIAL_VIEWBOX}
     preserveAspectRatio="xMinYMin meet"
     {...props}>
-    <Group top={RADIUS}
-      left={RADIUS}>
+    <Group top={0}
+      left={0}>
       {data.map(({ name, value, max }, idx) => {
         const ratio = value / max
         const innerRadius = radius(name)
@@ -88,12 +91,12 @@ export function SingularGauge({
 
   return <svg width="100%"
     height="100%"
-    viewBox="0 0 1000 1000"
+    viewBox={INITIAL_VIEWBOX}
     preserveAspectRatio="xMinYMin meet"
     {...props}>
 
-    <Group top={RADIUS}
-      left={RADIUS}>
+    <Group top={0}
+      left={0}>
       <Arc id={`arcbg-${name}`}
         data={Infinity}
         innerRadius={innerRadius}
@@ -131,6 +134,7 @@ SingularGauge.propTypes = {
 
 const GaugeContainer = styled.div`
   display: flex;
+  flex-direction: column;
   position: relative;
   width: 100%;
   height: 100%;
@@ -156,7 +160,7 @@ export default function PCMonitor({
   data,
   ...props
 }) {
-  const [debugText, setDebugText] = useState('')
+  const [debugData, setDebugData] = useState('')
 
   const radius = useMemo(() =>
     scaleBand({
@@ -172,10 +176,7 @@ export default function PCMonitor({
   const scales = { radius, angle }
 
   const [springProps, set] = useSprings(data.length + 1, () => ({
-    viewBox: '0 0 1200 1200',
-    from: {
-      viewBox: '0 0 1000 1000'
-    }
+    viewBox: INITIAL_VIEWBOX
   }))
   const dragBind = useDrag(({
     args: [index],
@@ -187,21 +188,26 @@ export default function PCMonitor({
     const [, rad] = cartesianToPolar(dx, dy)
     const deg = rad * 180 / Math.PI
     const trigger = velocity > 0.2
-    setDebugText(JSON.stringify({ index, down, movement, deg, velocity, trigger }))
+    setDebugData({ index, down, movement, deg, velocity, trigger })
 
     set(i => {
+      console.log(index, i, down)
       if (index !== i) return
 
-      return {
-        viewBox: '0 0 1200 1200'
+      return down ? {
+        viewBox: ACTIVE_VIEWBOX
+      } : {
+        viewBox: INITIAL_VIEWBOX
       }
     })
   })
 
+  const [multipleGaugeProps, ...singularGaugesProps] = springProps
   return <GaugeContainer>
     <AnimatedMultipleGauge data={data}
       scales={scales}
       {...props}
+      {...multipleGaugeProps}
       {...dragBind(0)}/>
     {data.map((item, index) => {
       const [x, y] = polarToCartesian(100, Math.PI / 2 * (index - 1))
@@ -213,12 +219,15 @@ export default function PCMonitor({
           top: `${y}%`,
           left: `${x}%`
         }}
+        {...singularGaugesProps[index]}
         {...props}/>
     })}
-    <span style={{
-      display: 'inline-block',
-      width: '50%'
-    }}>{debugText}</span>
+    {Object.entries(debugData).map(([key, val]) => <span key={key}
+      style={{
+        display: 'inline-block',
+        width: '50%',
+        fontSize: '0.5em'
+      }}>{key}: {JSON.stringify(val)}</span>)}
   </GaugeContainer>
 }
 PCMonitor.propTypes = {
