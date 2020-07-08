@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { Grid, Text } from '@zeit-ui/react'
 
-import PCMonitor from '../visualizer/BarCircular'
+import PCMonitor from '../visualizer/PCMonitor'
 import FileUploader from '../uploader/FileUploader'
 
 const AppHeader = styled.div`
