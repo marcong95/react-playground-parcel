@@ -10,8 +10,8 @@ A rookie programmer called Marco plays React in this repo.
 
 ```shell
 git clone https://github.com/marcong95/react-playground.git
-yarn
-yarn start
+npm install
+npm start
 # Just DO WHAT THE FUCK YOU WANT TO as the license says
 ```
 
