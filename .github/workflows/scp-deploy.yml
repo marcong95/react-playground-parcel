@@ -28,11 +28,10 @@ jobs:
     - run: npm run build --if-present
 #     - run: npm test
     - name: Copy file via SCP
-      uses: appleboy/scp-action@v0.1.1
+      uses: easingthemes/ssh-deploy@v2.1.4
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.KEY }}
-        passphrase: ${{ secrets.PASSPHRASE }}
-        source: "dist/*"
-        target: ${{ secrets.DEST_DIR }}
+        REMOTE_HOST: ${{ secrets.HOST }}
+        REMOTE_USER: ${{ secrets.USERNAME }}
+        SSH_PRIVATE_KEY: ${{ secrets.KEY }}
+        SOURCE: "dist/*"
+        TARGET: ${{ secrets.DEST_DIR }}
