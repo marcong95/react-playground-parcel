@@ -10,17 +10,12 @@ import { SingularGauge, MultipleGauge } from './BarCircular'
 
 const PALETTES = ['#d92027', '#ff9234', '#ffcd3c', '#35d0ba']
 
-// TODO: temporary use, replace with transform:scale
-const getViewBox = r => `${-r} ${-r} ${r * 2} ${r * 2}`
-const INITIAL_VIEWBOX = getViewBox(500)
-const ACTIVE_VIEWBOX = getViewBox(600)
-
 const GaugeContainer = styled.div`
   display: flex;
   position: relative;
   width: 100%;
   height: 100%;
-  /* overflow: hidden; */
+  overflow: hidden;
   user-select: none;
 
   &::after {
@@ -46,7 +41,7 @@ export default function PCMonitor({
   const [debugData, setDebugData] = useState('')
 
   const [springProps, set] = useSprings(data.length + 1, () => ({
-    viewBox: INITIAL_VIEWBOX
+    transform: 'scale(1)'
   }))
   const dragBind = useDrag(({
     args: [index],
@@ -64,9 +59,9 @@ export default function PCMonitor({
       if (index !== i) return
 
       return down ? {
-        viewBox: ACTIVE_VIEWBOX
+        transform: 'scale(0.8)'
       } : {
-        viewBox: INITIAL_VIEWBOX
+        transform: 'scale(1)'
       }
     })
   })
