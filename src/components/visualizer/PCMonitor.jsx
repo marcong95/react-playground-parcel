@@ -3,12 +3,31 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { useSprings, animated } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
+import useMeasure from 'react-use-measure'
 
-import { cartesianToPolar, polarToCartesian } from './utils'
+import { cartesianToPolar, polarToCartesian, roundTo } from './utils'
 import { GaugeContext } from './contexts'
 import { SingularGauge, MultipleGauge } from './BarCircular'
 
 const PALETTES = ['#d92027', '#ff9234', '#ffcd3c', '#35d0ba']
+
+const getViewBox = r => `${-r} ${-r} ${r * 2} ${r * 2}`
+const INITIAL_VIEWBOX = getViewBox(500)
+const ACTIVE_VIEWBOX = getViewBox(600)
+
+const snapTo = ([x, y], ringRadius, {
+  ringPartitions = 4,
+  movementThreshold = 0.5
+} = {}) => {
+  const [radius, angle] = cartesianToPolar(x, y)
+  const nearestAngle = roundTo(Math.PI * 2 / ringPartitions, angle)
+  console.log(nearestAngle * 180 / Math.PI, radius / ringRadius, radius, ringRadius)
+  if (radius / ringRadius < movementThreshold) {
+    return [0, 0]
+  } else {
+    return polarToCartesian(1, nearestAngle)
+  }
+}
 
 const GaugeContainer = styled.div`
   display: flex;
@@ -17,6 +36,7 @@ const GaugeContainer = styled.div`
   height: 100%;
   overflow: hidden;
   user-select: none;
+  overscroll-behavior-y: contain;
 
   &::after {
     content: "";
@@ -37,67 +57,67 @@ export default function PCMonitor({
   data,
   ...props
 }) {
+  const [el, bounds] = useMeasure()
+
   const [bandwidth, setBandwidth] = useState(0)
-  const [debugData, setDebugData] = useState('')
+  const [currentCenter, setCurrentCenter] = useState([0, 0])
 
-  const [springProps, set] = useSprings(data.length + 1, () => ({
-    transform: 'scale(1)'
-  }))
+  const [springProps, setSprings] = useSprings(data.length + 1, i => {
+    return {
+      top: 0,
+      left: 0,
+      viewBox: INITIAL_VIEWBOX
+    }
+  })
   const dragBind = useDrag(({
-    args: [index],
     down,
-    movement,
-    direction: [dx, dy], // [+/- 0/0.5sqrt(2)/1] * 2
-    velocity
+    movement: [mx, my]
   }) => {
-    const [, rad] = cartesianToPolar(dx, dy)
-    const deg = rad * 180 / Math.PI
-    const trigger = velocity > 0.2
-    setDebugData({ index, down, movement, deg, velocity, trigger })
+    const { width, height } = bounds
 
-    set(i => {
-      if (index !== i) return
-
-      return down ? {
-        transform: 'scale(0.8)'
-      } : {
-        transform: 'scale(1)'
-      }
-    })
+    if (down) {
+      setSprings({
+        top: my / width,
+        left: mx / height,
+        viewBox: ACTIVE_VIEWBOX
+      })
+    } else {
+      setCurrentCenter(snapTo([mx, my], Math.min(width, height)))
+      const [cx, cy] = currentCenter
+      setSprings({
+        top: cy,
+        left: cx,
+        viewBox: INITIAL_VIEWBOX
+      })
+    }
   })
 
   const [multipleGaugeProps, ...singularGaugesProps] = springProps
+  const { top, left, ...restSpringProps } = multipleGaugeProps
   return <GaugeContext.Provider value={{ bandwidth, setBandwidth }}>
-    <GaugeContainer>
+    <GaugeContainer ref={el}>
       <AnimatedMultipleGauge data={data}
+        style={{
+          top: top.interpolate(top => `${top * 100}%`),
+          left: left.interpolate(left => `${left * 100}%`)
+        }}
         palettes={PALETTES}
         {...props}
-        {...multipleGaugeProps}
+        {...restSpringProps}
         {...dragBind(0)}/>
       {data.map((item, index) => {
-        const [x, y] = polarToCartesian(100, Math.PI / 2 * (index - 1))
+        const [x0, y0] = polarToCartesian(100, Math.PI / 2 * (index - 1))
+        const { top, left, ...restSpringProps } = singularGaugesProps[index]
         return <AnimatedSingularGauge key={`subgauge-${item.name}`}
           data={item}
           accentColor={PALETTES[index]}
           style={{
-            top: `${y}%`,
-            left: `${x}%`
+            top: top.interpolate(top => `${y0 + top * 100}%`),
+            left: left.interpolate(left => `${x0 + left * 100}%`)
           }}
-          {...singularGaugesProps[index]}
+          {...restSpringProps}
           {...props}/>
       })}
-      <div style={{
-        position: 'absolute',
-        width: '50%',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        {Object.entries(debugData).map(([key, val]) => <span key={key}
-          style={{
-            display: 'inline-block',
-            fontSize: '0.5em'
-          }}>{key}: {JSON.stringify(val)}</span>)}
-      </div>
     </GaugeContainer>
   </GaugeContext.Provider>
 }
