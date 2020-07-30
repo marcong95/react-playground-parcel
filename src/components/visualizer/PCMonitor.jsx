@@ -15,13 +15,17 @@ const getViewBox = r => `${-r} ${-r} ${r * 2} ${r * 2}`
 const INITIAL_VIEWBOX = getViewBox(500)
 const ACTIVE_VIEWBOX = getViewBox(600)
 
+// FIXME: only works when dragging from center to outer
 const snapTo = ([x, y], ringRadius, {
   ringPartitions = 4,
   movementThreshold = 0.5
 } = {}) => {
   const [radius, angle] = cartesianToPolar(x, y)
   const nearestAngle = roundTo(Math.PI * 2 / ringPartitions, angle)
-  console.log(nearestAngle * 180 / Math.PI, radius / ringRadius, radius, ringRadius)
+  console.log(nearestAngle * 180 / Math.PI, radius / ringRadius)
+  if (Number.isNaN(radius)) {
+    console.error('radius is NaN', x, y, radius, angle)
+  }
   if (radius / ringRadius < movementThreshold) {
     return [0, 0]
   } else {
@@ -71,9 +75,11 @@ export default function PCMonitor({
   })
   const dragBind = useDrag(({
     down,
-    movement: [mx, my]
+    movement: [mx, my],
+    memo
   }) => {
     const { width, height } = bounds
+    console.log(memo)
 
     if (down) {
       setSprings({
@@ -89,6 +95,7 @@ export default function PCMonitor({
         left: cx,
         viewBox: INITIAL_VIEWBOX
       })
+      return currentCenter
     }
   })
 
@@ -102,9 +109,9 @@ export default function PCMonitor({
           left: left.interpolate(left => `${left * 100}%`)
         }}
         palettes={PALETTES}
-        {...props}
         {...restSpringProps}
-        {...dragBind(0)}/>
+        {...dragBind(0)}
+        {...props}/>
       {data.map((item, index) => {
         const [x0, y0] = polarToCartesian(100, Math.PI / 2 * (index - 1))
         const { top, left, ...restSpringProps } = singularGaugesProps[index]
@@ -116,6 +123,7 @@ export default function PCMonitor({
             left: left.interpolate(left => `${x0 + left * 100}%`)
           }}
           {...restSpringProps}
+          {...dragBind(index + 1)}
           {...props}/>
       })}
     </GaugeContainer>

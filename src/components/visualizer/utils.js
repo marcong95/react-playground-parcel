@@ -1,6 +1,6 @@
 export function cartesianToPolar(x, y) {
+  const radius = Math.sqrt(x ** 2 + y ** 2)
   const angle = Math.atan2(y, x)
-  const radius = y / Math.sin(angle)
   return [radius, angle]
 }
 
