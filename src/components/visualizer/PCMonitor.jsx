@@ -22,7 +22,7 @@ const snapTo = ([x, y], ringRadius, {
 } = {}) => {
   const [radius, angle] = cartesianToPolar(x, y)
   const nearestAngle = roundTo(Math.PI * 2 / ringPartitions, angle)
-  console.log(nearestAngle * 180 / Math.PI, radius / ringRadius)
+
   if (Number.isNaN(radius)) {
     console.error('radius is NaN', x, y, radius, angle)
   }
@@ -75,27 +75,29 @@ export default function PCMonitor({
   })
   const dragBind = useDrag(({
     down,
-    movement: [mx, my],
-    memo
+    movement: [mx, my]
   }) => {
     const { width, height } = bounds
-    console.log(memo)
+    const ringRadius = Math.min(width, height)
 
     if (down) {
+      const [cx, cy] = currentCenter
+
       setSprings({
-        top: my / width,
-        left: mx / height,
+        top: my / width + cy,
+        left: mx / height + cx,
         viewBox: ACTIVE_VIEWBOX
       })
     } else {
-      setCurrentCenter(snapTo([mx, my], Math.min(width, height)))
       const [cx, cy] = currentCenter
+      const [sx, sy] = snapTo([mx + cx * width, my + cy * width], ringRadius)
+
+      setCurrentCenter([sx, sy])
       setSprings({
-        top: cy,
-        left: cx,
+        top: sy,
+        left: sx,
         viewBox: INITIAL_VIEWBOX
       })
-      return currentCenter
     }
   })
 

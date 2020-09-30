@@ -31,7 +31,6 @@ export function MultipleGauge({
       padding: 0.15
     }), [data])
   useEffect(() => {
-    console.log('setBandwidth in useEffect', radiusScale.bandwidth())
     setBandwidth(radiusScale.bandwidth())
   }, [data])
 
