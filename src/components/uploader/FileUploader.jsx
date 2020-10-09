@@ -34,9 +34,18 @@ const FileListItemDot = styled(Dot)`
 const FileListItemText = styled(Text)`
   margin-right: 0.5em;
 `
+const FileListItemButton = styled(Button)`
+  margin-left: 0.5em;
+`
+const FileListItemProgress = styled(Progress)`
+  display: inline-block;
+  width: 100px !important;
+  margin-left: 0.5em;
+`
 
 export const FileListItem = ({
   file,
+  progress,
   type = 'default',
   upload
 }) => {
@@ -44,15 +53,20 @@ export const FileListItem = ({
     <FileListItemText span
       small>{file.name}</FileListItemText>
     <Tag>{file.type}</Tag>
-    <Button auto
-      size="mini"
-      onClick={() => upload(file)}>
-      <Upload size={12} />
-    </Button>
+    {progress
+      ? <FileListItemProgress value={progress.loaded}
+        max={progress.total}
+        type={progress.loaded < progress.total ? 'default' : 'success'} />
+      : <FileListItemButton auto
+        size="mini"
+        onClick={upload}>
+        <Upload size={12} />
+      </FileListItemButton>}
   </FileListItemDot>
 }
 FileListItem.propTypes = {
   file: PropTypes.object,
+  progress: PropTypes.object,
   type: PropTypes.string,
   upload: PropTypes.func
 }
@@ -67,18 +81,19 @@ export default class FileUploader extends Component {
   }
 
   constructor(props) {
-    super(props)
+    super()
 
     this.fileInput = React.createRef()
 
     this.state = {
-      data: []
+      data: [],
+      progress: {}
     }
   }
 
   render() {
     const { title } = this.props
-    const { data } = this.state
+    const { data, progress } = this.state
 
     return (
       <Card>
@@ -94,8 +109,9 @@ export default class FileUploader extends Component {
         {data.map(file =>
           <FileListItem key={file.name}
             file={file}
+            progress={progress[file.name]}
             type="default"
-            upload={this.uploadOne} />)}
+            upload={() => this.uploadOne(file)} />)}
 
         <form name="fileForm"
           style={{ display: 'none' }}>
@@ -131,8 +147,19 @@ export default class FileUploader extends Component {
     axios.post('http://localhost:4321', formData, {
       onUploadProgress: progress => {
         const { loaded, total } = progress
-        const percentage = (loaded / total * 100).toFixed(1)
-        console.log(`uploading ${file.name}: ${loaded} / ${total}, ${percentage}%`)
+        this.setState({
+          progress: {
+            ...this.state.progress,
+            [file.name]: { loaded, total }
+          }
+        })
+      }
+    })
+
+    this.setState({
+      progress: {
+        ...this.state.progress,
+        [file.name]: { loaded: 0, total: file.size }
       }
     })
   }

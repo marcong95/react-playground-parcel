@@ -1,3 +1,12 @@
+http://localhost {
+    file_server {
+        root ./dist
+    }
+    log {
+        output file ./logs/react.log
+    }
+}
+
 http://localhost:4321 {
     file_server {
         root ./upload
@@ -7,6 +16,6 @@ http://localhost:4321 {
         Access-Control-Allow-Origin *
     }
     log {
-        output file ./logs/access.log
+        output file ./logs/upload.log
     }
 }
