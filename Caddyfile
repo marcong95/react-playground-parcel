@@ -1,9 +1,12 @@
-http://localhost:4321
-
-file_server {
-    root ./upload
-    browse
-}
-header {
-    Access-Control-Allow-Origin *
+http://localhost:4321 {
+    file_server {
+        root ./upload
+        browse
+    }
+    header {
+        Access-Control-Allow-Origin *
+    }
+    log {
+        output file ./logs/access.log
+    }
 }

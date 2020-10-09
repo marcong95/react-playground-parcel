@@ -1,6 +1,7 @@
 .cache/
 node_modules/
 dist/
+logs/
 
 # just commit an empty directory
 upload/*
