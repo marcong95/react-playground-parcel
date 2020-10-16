@@ -1,5 +1,3 @@
-const { join } = require('path')
-
 const Koa = require('koa')
 const cors = require('@koa/cors')
 const body = require('koa-body')
@@ -11,6 +9,7 @@ app.use(cors())
 app.use(body())
 
 const handleRequest = ctx => {
+  console.log('  URL:', ctx.request.url)
   console.log('QUERY:', ctx.request.query)
   console.log(' TYPE:', ctx.headers['content-type'])
   console.log(' BODY:', ctx.request.body)
